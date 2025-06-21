@@ -1,6 +1,6 @@
 class AuthService {
   constructor() {
-    this.apiBaseUrl = 'http://localhost:8000/api/auth';
+    this.apiBaseUrl = 'http://localhost:8001/api/auth';
     this.tokenKey = 'moodcast_token';
     this.refreshTokenKey = 'moodcast_refresh_token';
     this.userKey = 'moodcast_user';
@@ -11,6 +11,9 @@ class AuthService {
    */
   async register(userData) {
     try {
+      console.log('AuthService: Attempting registration with data:', userData);
+      console.log('AuthService: API URL:', `${this.apiBaseUrl}/register`);
+      
       const response = await fetch(`${this.apiBaseUrl}/register`, {
         method: 'POST',
         headers: {
@@ -19,18 +22,27 @@ class AuthService {
         body: JSON.stringify(userData)
       });
 
+      console.log('AuthService: Response status:', response.status);
+      console.log('AuthService: Response headers:', [...response.headers.entries()]);
+
       const result = await response.json();
+      console.log('AuthService: Response data:', result);
 
       if (result.status === 'success') {
-        // Store tokens and user data
-        this.setTokens(result.data.access_token, result.data.refresh_token);
+        // Store user data (no tokens needed for simple auth)
         this.setUser(result.data.user);
         return { success: true, data: result.data };
       } else {
         return { success: false, error: result.message, errors: result.errors };
       }
     } catch (error) {
-      return { success: false, error: error.message };
+      console.error('AuthService: Registration error:', error);
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+      return { success: false, error: `Connection failed: ${error.message}` };
     }
   }
 
@@ -39,6 +51,9 @@ class AuthService {
    */
   async login(email, password) {
     try {
+      console.log('AuthService: Attempting login with email:', email);
+      console.log('AuthService: API URL:', `${this.apiBaseUrl}/login`);
+      
       const response = await fetch(`${this.apiBaseUrl}/login`, {
         method: 'POST',
         headers: {
@@ -47,14 +62,94 @@ class AuthService {
         body: JSON.stringify({ email, password })
       });
 
+      console.log('AuthService: Login response status:', response.status);
+
+      const result = await response.json();
+      console.log('AuthService: Login response data:', result);
+
+      if (result.status === 'success') {
+        // Store user data (no tokens needed for simple auth)
+        this.setUser(result.data.user);
+        this.setWeatherPreferences(result.data.user.weather_preferences || []);
+        
+        // Store password temporarily for session (for authenticated requests)
+        // Note: This is not ideal for security, but needed for simple auth
+        sessionStorage.setItem('moodcast_session_password', password);
+        
+        return { success: true, data: result.data };
+      } else {
+        return { success: false, error: result.message };
+      }
+    } catch (error) {
+      console.error('AuthService: Login error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Logout user
+   */
+  logout() {
+    localStorage.removeItem(this.userKey);
+    localStorage.removeItem('moodcast_weather_preferences');
+    sessionStorage.removeItem('moodcast_session_password');
+  }
+
+  /**
+   * Get current user profile
+   */
+  async getCurrentUser() {
+    // For simple auth, we need email and password stored temporarily
+    const user = this.getUser();
+    if (!user || !user.email) {
+      return { success: false, error: 'No user data found' };
+    }
+
+    // For now, just return the stored user data
+    // In a real implementation, you might want to verify credentials
+    return { 
+      success: true, 
+      data: { 
+        user: user,
+        weather_preferences: this.getWeatherPreferences()
+      }
+    };
+  }
+
+  /**
+   * Update weather preferences
+   */
+  async updateWeatherPreferences(preferences) {
+    try {
+      const user = this.getUser();
+      if (!user || !user.email) {
+        return { success: false, error: 'No user authentication found' };
+      }
+
+      // For simple auth, we need to store user's password temporarily during session
+      // This is not ideal for security, but for demo purposes
+      const password = sessionStorage.getItem('moodcast_session_password');
+      if (!password) {
+        return { success: false, error: 'Session expired. Please login again.' };
+      }
+
+      const response = await fetch(`${this.apiBaseUrl}/preferences`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          email: user.email,
+          password: password,
+          preferences: preferences 
+        })
+      });
+
       const result = await response.json();
 
       if (result.status === 'success') {
-        // Store tokens and user data
-        this.setTokens(result.data.access_token, result.data.refresh_token);
-        this.setUser(result.data.user);
-        this.setWeatherPreferences(result.data.weather_preferences);
-        return { success: true, data: result.data };
+        this.setWeatherPreferences(preferences);
+        return { success: true, data: result };
       } else {
         return { success: false, error: result.message };
       }
@@ -64,70 +159,26 @@ class AuthService {
   }
 
   /**
-   * Logout user
-   */
-  logout() {
-    localStorage.removeItem(this.tokenKey);
-    localStorage.removeItem(this.refreshTokenKey);
-    localStorage.removeItem(this.userKey);
-    localStorage.removeItem('moodcast_weather_preferences');
-  }
-
-  /**
-   * Get current user profile
-   */
-  async getCurrentUser() {
-    try {
-      const response = await this.authenticatedRequest('/me');
-      
-      if (response.success) {
-        this.setUser(response.data.user);
-        this.setWeatherPreferences(response.data.weather_preferences);
-        return response;
-      }
-      
-      return response;
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  /**
-   * Update weather preferences
-   */
-  async updateWeatherPreferences(preferences) {
-    try {
-      const response = await this.authenticatedRequest('/preferences', {
-        method: 'PUT',
-        body: JSON.stringify({ preferences })
-      });
-
-      if (response.success) {
-        this.setWeatherPreferences(preferences);
-      }
-
-      return response;
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  /**
-   * Make authenticated request
+   * Make authenticated request (using stored credentials for simple auth)
    */
   async authenticatedRequest(endpoint, options = {}) {
-    const token = this.getToken();
+    const user = this.getUser();
+    const sessionPassword = sessionStorage.getItem('moodcast_session_password');
     
-    if (!token) {
-      throw new Error('No authentication token found');
+    if (!user || !sessionPassword) {
+      throw new Error('No authentication credentials found. Please login again.');
     }
 
     const defaultOptions = {
-      method: 'GET',
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
+      },
+      body: JSON.stringify({
+        email: user.email,
+        password: sessionPassword,
+        ...(options.body ? JSON.parse(options.body) : {})
+      })
     };
 
     const requestOptions = {
@@ -143,7 +194,7 @@ class AuthService {
     const result = await response.json();
 
     if (response.status === 401) {
-      // Token might be expired, try to refresh or logout
+      // Authentication failed, logout
       this.logout();
       throw new Error('Authentication expired, please login again');
     }
@@ -155,7 +206,7 @@ class AuthService {
    * Check if user is authenticated
    */
   isAuthenticated() {
-    return !!this.getToken() && !!this.getUser();
+    return !!this.getUser();
   }
 
   /**

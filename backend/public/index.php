@@ -6,8 +6,10 @@ use DI\Container;
 use App\Services\WeatherService;
 use App\Services\JWTService;
 use App\Services\DatabaseService;
+use App\Services\SupabaseService;
 use App\Controllers\WeatherController;
 use App\Controllers\AuthController;
+use App\Controllers\EmotionController;
 use App\Models\User;
 use App\Middleware\JWTMiddleware;
 
@@ -30,6 +32,10 @@ $container->set(WeatherController::class, function ($container) {
 });
 
 // Auth dependencies
+$container->set(SupabaseService::class, function () {
+    return new SupabaseService();
+});
+
 $container->set(JWTService::class, function () {
     return new JWTService();
 });
@@ -40,8 +46,13 @@ $container->set(User::class, function () {
 
 $container->set(AuthController::class, function ($container) {
     return new AuthController(
-        $container->get(User::class),
-        $container->get(JWTService::class)
+        $container->get(User::class)
+    );
+});
+
+$container->set(EmotionController::class, function ($container) {
+    return new EmotionController(
+        $container->get(SupabaseService::class)
     );
 });
 
@@ -96,5 +107,9 @@ $weatherRoutes($app);
 // Include auth routes
 $authRoutes = require __DIR__ . '/../src/routes/auth.php';
 $authRoutes($app);
+
+// Include emotion routes
+$emotionRoutes = require __DIR__ . '/../src/routes/emotions.php';
+$emotionRoutes($app);
 
 $app->run();

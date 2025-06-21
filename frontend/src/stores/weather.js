@@ -10,7 +10,7 @@ export const useWeatherStore = defineStore('weather', () => {
   const selectedLocation = ref(null)
 
   // API base URL
-  const API_BASE_URL = 'http://localhost:8000/api/weather'
+  const API_BASE_URL = 'http://localhost:8001/api/weather'
 
   // Getters
   const isLoading = computed(() => loading.value)

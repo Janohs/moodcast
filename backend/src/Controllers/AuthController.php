@@ -3,20 +3,16 @@
 namespace App\Controllers;
 
 use App\Models\User;
-use App\Services\JWTService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Respect\Validation\Validator as v;
 
 class AuthController
 {
     private $userModel;
-    private $jwtService;
 
-    public function __construct(User $userModel, JWTService $jwtService)
+    public function __construct(User $userModel)
     {
         $this->userModel = $userModel;
-        $this->jwtService = $jwtService;
     }
 
     /**
@@ -52,18 +48,16 @@ class AuthController
             // Create user
             $user = $this->userModel->create($data);
 
-            // Generate tokens
-            $accessToken = $this->jwtService->generateToken($user);
-            $refreshToken = $this->jwtService->generateRefreshToken($user['id']);
-
             $response->getBody()->write(json_encode([
                 'status' => 'success',
                 'message' => 'User registered successfully',
                 'data' => [
-                    'user' => $user,
-                    'access_token' => $accessToken,
-                    'refresh_token' => $refreshToken,
-                    'token_type' => 'Bearer'
+                    'user' => [
+                        'id' => $user['id'],
+                        'email' => $user['email'],
+                        'name' => $user['name'],
+                        'weather_preferences' => $user['weather_preferences'] ?? []
+                    ]
                 ]
             ]));
 
@@ -115,25 +109,19 @@ class AuthController
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(401);
             }
 
-            // Generate tokens
+            // Return user data
             $userResponse = [
                 'id' => $user['id'],
                 'email' => $user['email'],
-                'name' => $user['name']
+                'name' => $user['name'],
+                'weather_preferences' => $user['weather_preferences'] ?? []
             ];
-
-            $accessToken = $this->jwtService->generateToken($userResponse);
-            $refreshToken = $this->jwtService->generateRefreshToken($user['id']);
 
             $response->getBody()->write(json_encode([
                 'status' => 'success',
                 'message' => 'Login successful',
                 'data' => [
-                    'user' => $userResponse,
-                    'weather_preferences' => $user['weather_preferences'],
-                    'access_token' => $accessToken,
-                    'refresh_token' => $refreshToken,
-                    'token_type' => 'Bearer'
+                    'user' => $userResponse
                 ]
             ]));
 
@@ -150,21 +138,39 @@ class AuthController
 
     /**
      * Get current user profile
-     * GET /api/auth/me
+     * POST /api/auth/me (expects email and password for simple auth)
      */
     public function me(Request $request, Response $response): Response
     {
         try {
-            // Get user from middleware
-            $userId = $request->getAttribute('userId');
-            
-            $user = $this->userModel->findById($userId);
+            $data = json_decode($request->getBody()->getContents(), true);
+
+            // Validation
+            if (!isset($data['email']) || !isset($data['password'])) {
+                $response->getBody()->write(json_encode([
+                    'status' => 'error',
+                    'message' => 'Email and password are required'
+                ]));
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+            }
+
+            // Find user
+            $user = $this->userModel->findByEmail($data['email']);
             if (!$user) {
                 $response->getBody()->write(json_encode([
                     'status' => 'error',
-                    'message' => 'User not found'
+                    'message' => 'Invalid credentials'
                 ]));
-                return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(401);
+            }
+
+            // Verify password
+            if (!$this->userModel->verifyPassword($data['password'], $user['password_hash'])) {
+                $response->getBody()->write(json_encode([
+                    'status' => 'error',
+                    'message' => 'Invalid credentials'
+                ]));
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(401);
             }
 
             $response->getBody()->write(json_encode([
@@ -173,9 +179,9 @@ class AuthController
                     'user' => [
                         'id' => $user['id'],
                         'email' => $user['email'],
-                        'name' => $user['name']
-                    ],
-                    'weather_preferences' => $user['weather_preferences']
+                        'name' => $user['name'],
+                        'weather_preferences' => $user['weather_preferences'] ?? []
+                    ]
                 ]
             ]));
 
@@ -192,15 +198,42 @@ class AuthController
 
     /**
      * Update weather preferences
-     * PUT /api/auth/preferences
+     * PUT /api/auth/preferences (expects email, password, and preferences)
      */
     public function updatePreferences(Request $request, Response $response): Response
     {
         try {
-            $userId = $request->getAttribute('userId');
             $data = json_decode($request->getBody()->getContents(), true);
 
-            $this->userModel->updatePreferences($userId, $data['preferences'] ?? []);
+            // Validation
+            if (!isset($data['email']) || !isset($data['password'])) {
+                $response->getBody()->write(json_encode([
+                    'status' => 'error',
+                    'message' => 'Email and password are required'
+                ]));
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+            }
+
+            // Find user
+            $user = $this->userModel->findByEmail($data['email']);
+            if (!$user) {
+                $response->getBody()->write(json_encode([
+                    'status' => 'error',
+                    'message' => 'Invalid credentials'
+                ]));
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(401);
+            }
+
+            // Verify password
+            if (!$this->userModel->verifyPassword($data['password'], $user['password_hash'])) {
+                $response->getBody()->write(json_encode([
+                    'status' => 'error',
+                    'message' => 'Invalid credentials'
+                ]));
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(401);
+            }
+
+            $this->userModel->updatePreferences($user['id'], $data['preferences'] ?? []);
 
             $response->getBody()->write(json_encode([
                 'status' => 'success',

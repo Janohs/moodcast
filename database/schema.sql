@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
     name VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL, -- Store hashed password for JWT auth
     preferred_weather JSONB DEFAULT '{}', -- Store weather preferences as JSON
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

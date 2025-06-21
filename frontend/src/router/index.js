@@ -28,6 +28,23 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/mood-entry',
+      name: 'mood-entry',
+      component: () => import('../components/MoodEntry.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/insights',
+      name: 'insights',
+      component: () => import('../components/Insights.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/input-test',
+      name: 'input-test',
+      component: () => import('../components/InputTest.vue')
+    },
+    {
       path: '/database-test',
       name: 'database-test',
       component: () => import('../components/DatabaseTest.vue')
@@ -36,6 +53,11 @@ const router = createRouter({
       path: '/weather-test',
       name: 'weather-test',
       component: () => import('../components/WeatherServiceTest.vue')
+    },
+    {
+      path: '/input-test',
+      name: 'input-test',
+      component: () => import('../components/InputTest.vue')
     }
   ]
 })

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moodcast Authentication Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .response {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .success {
+            border-color: #28a745;
+            background-color: #d4edda;
+        }
+        .error {
+            border-color: #dc3545;
+            background-color: #f8d7da;
+        }
+    </style>
+</head>
+<body>
+    <h1>Moodcast Authentication Test</h1>
+    
+    <div class="container">
+        <h2>1. Register User</h2>
+        <div class="form-group">
+            <label for="reg-name">Name:</label>
+            <input type="text" id="reg-name" value="Test User">
+        </div>
+        <div class="form-group">
+            <label for="reg-email">Email:</label>
+            <input type="email" id="reg-email" value="test@example.com">
+        </div>
+        <div class="form-group">
+            <label for="reg-password">Password:</label>
+            <input type="password" id="reg-password" value="password123">
+        </div>
+        <button onclick="register()">Register</button>
+        <div id="register-response" class="response" style="display: none;"></div>
+    </div>
+
+    <div class="container">
+        <h2>2. Login User</h2>
+        <div class="form-group">
+            <label for="login-email">Email:</label>
+            <input type="email" id="login-email" value="test@example.com">
+        </div>
+        <div class="form-group">
+            <label for="login-password">Password:</label>
+            <input type="password" id="login-password" value="password123">
+        </div>
+        <button onclick="login()">Login</button>
+        <div id="login-response" class="response" style="display: none;"></div>
+    </div>
+
+    <div class="container">
+        <h2>3. Get User Profile</h2>
+        <div class="form-group">
+            <label for="profile-email">Email:</label>
+            <input type="email" id="profile-email" value="test@example.com">
+        </div>
+        <div class="form-group">
+            <label for="profile-password">Password:</label>
+            <input type="password" id="profile-password" value="password123">
+        </div>
+        <button onclick="getProfile()">Get Profile</button>
+        <div id="profile-response" class="response" style="display: none;"></div>
+    </div>
+
+    <div class="container">
+        <h2>4. Update Preferences</h2>
+        <div class="form-group">
+            <label for="pref-email">Email:</label>
+            <input type="email" id="pref-email" value="test@example.com">
+        </div>
+        <div class="form-group">
+            <label for="pref-password">Password:</label>
+            <input type="password" id="pref-password" value="password123">
+        </div>
+        <div class="form-group">
+            <label for="preferences">Preferences (JSON):</label>
+            <textarea id="preferences" rows="3">["sunny", "cloudy", "rainy"]</textarea>
+        </div>
+        <button onclick="updatePreferences()">Update Preferences</button>
+        <div id="preferences-response" class="response" style="display: none;"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api/auth';
+
+        async function makeRequest(endpoint, method, data) {
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                return {
+                    status: response.status,
+                    data: result
+                };
+            } catch (error) {
+                return {
+                    status: 0,
+                    data: { error: error.message }
+                };
+            }
+        }
+
+        function showResponse(elementId, status, data) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = 'response ' + (status >= 200 && status < 300 ? 'success' : 'error');
+            element.textContent = `Status: ${status}\n${JSON.stringify(data, null, 2)}`;
+        }
+
+        async function register() {
+            const data = {
+                name: document.getElementById('reg-name').value,
+                email: document.getElementById('reg-email').value,
+                password: document.getElementById('reg-password').value,
+                weather_preferences: ['sunny', 'cloudy']
+            };
+
+            const result = await makeRequest('/register', 'POST', data);
+            showResponse('register-response', result.status, result.data);
+        }
+
+        async function login() {
+            const data = {
+                email: document.getElementById('login-email').value,
+                password: document.getElementById('login-password').value
+            };
+
+            const result = await makeRequest('/login', 'POST', data);
+            showResponse('login-response', result.status, result.data);
+        }
+
+        async function getProfile() {
+            const data = {
+                email: document.getElementById('profile-email').value,
+                password: document.getElementById('profile-password').value
+            };
+
+            const result = await makeRequest('/me', 'POST', data);
+            showResponse('profile-response', result.status, result.data);
+        }
+
+        async function updatePreferences() {
+            const data = {
+                email: document.getElementById('pref-email').value,
+                password: document.getElementById('pref-password').value,
+                preferences: JSON.parse(document.getElementById('preferences').value)
+            };
+
+            const result = await makeRequest('/preferences', 'PUT', data);
+            showResponse('preferences-response', result.status, result.data);
+        }
+    </script>
+</body>
+</html>

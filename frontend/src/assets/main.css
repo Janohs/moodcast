@@ -1,9 +1,28 @@
 @import './base.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 #app {
   width: 100%;
   min-height: 100vh;
   font-weight: normal;
+  overflow-x: hidden;
+}
+
+/* Global transitions */
+* {
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* Custom focus styles */
+input:focus, button:focus {
+  outline: none;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
 }
 
 a,

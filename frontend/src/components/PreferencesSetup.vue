@@ -165,54 +165,6 @@
           </div>
         </div>
 
-        <!-- Step 3: Activity & Mood -->
-        <div v-if="currentStep === 3" class="space-y-6">
-          <h2 class="text-2xl font-semibold text-white mb-4">🎯 Activities & Mood</h2>
-          
-          <div>
-            <label class="block text-white text-sm font-medium mb-3">What activities do you enjoy in different weather?</label>
-            <textarea
-              v-model="preferences.activities.description"
-              rows="4"
-              class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              placeholder="E.g., I love walking in light rain, reading during thunderstorms, cycling on sunny days..."
-            ></textarea>
-          </div>
-
-          <div>
-            <label class="block text-white text-sm font-medium mb-3">How does weather generally affect your mood?</label>
-            <div class="space-y-3">
-              <label v-for="option in moodOptions" :key="option.value" class="flex items-center cursor-pointer">
-                <input
-                  v-model="preferences.mood.sensitivity"
-                  type="radio"
-                  :value="option.value"
-                  class="sr-only"
-                />
-                <div :class="[
-                  'w-4 h-4 rounded-full border-2 mr-3 flex items-center justify-center',
-                  preferences.mood.sensitivity === option.value
-                    ? 'border-blue-400 bg-blue-500'
-                    : 'border-white/50'
-                ]">
-                  <div v-if="preferences.mood.sensitivity === option.value" class="w-2 h-2 bg-white rounded-full"></div>
-                </div>
-                <span class="text-white">{{ option.label }}</span>
-              </label>
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-white text-sm font-medium mb-3">Any additional notes about your weather preferences?</label>
-            <textarea
-              v-model="preferences.notes"
-              rows="3"
-              class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              placeholder="E.g., I have seasonal allergies, I work outdoors, I prefer cloudy days for photography..."
-            ></textarea>
-          </div>
-        </div>
-
         <!-- Navigation Buttons -->
         <div class="flex justify-between mt-8">
           <button
@@ -261,7 +213,7 @@ const router = useRouter()
 
 // State
 const currentStep = ref(1)
-const totalSteps = ref(3)
+const totalSteps = ref(2)
 const loading = ref(false)
 const error = ref('')
 
@@ -275,14 +227,7 @@ const preferences = reactive({
   conditions: {
     liked: [],
     disliked: []
-  },
-  activities: {
-    description: ''
-  },
-  mood: {
-    sensitivity: 'moderate'
-  },
-  notes: ''
+  }
 })
 
 // Options
@@ -297,13 +242,6 @@ const weatherConditions = [
   { value: 'windy', label: 'Windy', emoji: '💨' }
 ]
 
-const moodOptions = [
-  { value: 'high', label: 'Weather strongly affects my mood' },
-  { value: 'moderate', label: 'Weather moderately affects my mood' },
-  { value: 'low', label: 'Weather rarely affects my mood' },
-  { value: 'none', label: 'Weather doesn\'t affect my mood' }
-]
-
 // Computed
 const canProceed = computed(() => {
   switch (currentStep.value) {
@@ -314,8 +252,6 @@ const canProceed = computed(() => {
              preferences.temperature.min < preferences.temperature.max
     case 2:
       return preferences.conditions.liked.length > 0
-    case 3:
-      return preferences.mood.sensitivity !== ''
     default:
       return true
   }
