@@ -4,7 +4,12 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 use DI\Container;
 use App\Services\WeatherService;
+use App\Services\JWTService;
+use App\Services\DatabaseService;
 use App\Controllers\WeatherController;
+use App\Controllers\AuthController;
+use App\Models\User;
+use App\Middleware\JWTMiddleware;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -22,6 +27,26 @@ $container->set(WeatherService::class, function () {
 
 $container->set(WeatherController::class, function ($container) {
     return new WeatherController($container->get(WeatherService::class));
+});
+
+// Auth dependencies
+$container->set(JWTService::class, function () {
+    return new JWTService();
+});
+
+$container->set(User::class, function () {
+    return new User();
+});
+
+$container->set(AuthController::class, function ($container) {
+    return new AuthController(
+        $container->get(User::class),
+        $container->get(JWTService::class)
+    );
+});
+
+$container->set(JWTMiddleware::class, function ($container) {
+    return new JWTMiddleware($container->get(JWTService::class));
 });
 
 // Create App with container
@@ -67,5 +92,9 @@ $app->get('/health', function (Request $request, Response $response, $args) {
 // Include weather routes
 $weatherRoutes = require __DIR__ . '/../src/routes/weather.php';
 $weatherRoutes($app);
+
+// Include auth routes
+$authRoutes = require __DIR__ . '/../src/routes/auth.php';
+$authRoutes($app);
 
 $app->run();

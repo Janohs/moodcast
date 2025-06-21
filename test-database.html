@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Connection Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .test-result { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        #results { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Supabase Database Connection Test</h1>
+    <p>This will test if your Supabase database is working correctly.</p>
+    
+    <button onclick="runTests()">Run Database Tests</button>
+    
+    <div id="results"></div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js@2';
+        
+        const supabaseUrl = 'https://jibunkdteetnauphsuqj.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppYnVua2R0ZWV0bmF1cGhzdXFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA1MDMzOTcsImV4cCI6MjA2NjA3OTM5N30.9BrcglhtbAhkolcrXZsOJIK0-vovlcHYgAxQ5U4e4ts';
+        
+        const supabase = createClient(supabaseUrl, supabaseKey);
+        
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = message;
+            results.appendChild(div);
+        }
+        
+        window.runTests = async function() {
+            document.getElementById('results').innerHTML = '';
+            addResult('🚀 Starting database tests...', 'info');
+            
+            try {
+                // Test 1: Basic connection
+                addResult('1️⃣ Testing basic connection...', 'info');
+                const { data: healthCheck, error: healthError } = await supabase
+                    .from('weather_logs')
+                    .select('count', { count: 'exact', head: true });
+                
+                if (healthError) {
+                    addResult(`❌ Connection failed: ${healthError.message}`, 'error');
+                    return;
+                }
+                addResult('✅ Connected to Supabase successfully!', 'success');
+                
+                // Test 2: Insert weather data
+                addResult('2️⃣ Testing weather_logs table insertion...', 'info');
+                const weatherData = {
+                    location: 'Test City ' + Date.now(),
+                    temperature: 22.5,
+                    weather_condition: 'Sunny',
+                    weather_description: 'Clear blue skies',
+                    recorded_at: new Date().toISOString()
+                };
+                
+                const { data: insertResult, error: insertError } = await supabase
+                    .from('weather_logs')
+                    .insert(weatherData)
+                    .select()
+                    .single();
+                
+                if (insertError) {
+                    addResult(`❌ Insert failed: ${insertError.message}`, 'error');
+                } else {
+                    addResult(`✅ Weather log created with ID: ${insertResult.id}`, 'success');
+                }
+                
+                // Test 3: Read data
+                addResult('3️⃣ Testing data retrieval...', 'info');
+                const { data: allWeather, error: readError } = await supabase
+                    .from('weather_logs')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(3);
+                
+                if (readError) {
+                    addResult(`❌ Data retrieval failed: ${readError.message}`, 'error');
+                } else {
+                    addResult(`✅ Retrieved ${allWeather.length} weather records`, 'success');
+                    if (allWeather.length > 0) {
+                        addResult(`📊 Latest: ${allWeather[0].location} - ${allWeather[0].temperature}°C - ${allWeather[0].weather_condition}`, 'info');
+                    }
+                }
+                
+                // Test 4: Check all tables exist
+                addResult('4️⃣ Checking all tables exist...', 'info');
+                
+                const tables = ['users', 'weather_logs', 'emotions'];
+                for (const table of tables) {
+                    try {
+                        const { error } = await supabase
+                            .from(table)
+                            .select('count', { count: 'exact', head: true });
+                        
+                        if (error) {
+                            addResult(`❌ Table '${table}' not accessible: ${error.message}`, 'error');
+                        } else {
+                            addResult(`✅ Table '${table}' exists and accessible`, 'success');
+                        }
+                    } catch (e) {
+                        addResult(`❌ Table '${table}' check failed: ${e.message}`, 'error');
+                    }
+                }
+                
+                addResult('🎉 Database tests completed! Check results above.', 'success');
+                
+            } catch (error) {
+                addResult(`❌ Unexpected error: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
