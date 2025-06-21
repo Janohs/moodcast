@@ -1,6 +1,6 @@
 class AuthService {
   constructor() {
-    this.apiBaseUrl = 'http://localhost:8001/api/auth';
+    this.apiBaseUrl = 'http://localhost:8000/api/auth';
     this.tokenKey = 'moodcast_token';
     this.refreshTokenKey = 'moodcast_refresh_token';
     this.userKey = 'moodcast_user';

@@ -211,7 +211,7 @@ class SupabaseService
     public function getUserEmotions($userId, $limit = 30, $days = 30)
     {
         try {
-            $dateFrom = date('Y-m-d H:i:s', strtotime("-{$days} days"));
+            $dateFrom = date('c', strtotime("-{$days} days")); // ISO 8601 format
             
             $response = $this->client->get('/rest/v1/emotions', [
                 'headers' => [
@@ -246,7 +246,7 @@ class SupabaseService
     public function getEmotionInsights($userId, $days = 30)
     {
         try {
-            $dateFrom = date('Y-m-d H:i:s', strtotime("-{$days} days"));
+            $dateFrom = date('c', strtotime("-{$days} days")); // ISO 8601 format
             
             // Get emotions with weather data
             $response = $this->client->get('/rest/v1/emotions', [

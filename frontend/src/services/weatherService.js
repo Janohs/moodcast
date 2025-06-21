@@ -3,7 +3,7 @@ import { weatherService as dbWeatherService } from '../utils/database.js';
 class WeatherAPIService {
   constructor() {
     // We'll call the backend PHP API that we already have
-    this.apiBaseUrl = 'http://localhost:8001';
+    this.apiBaseUrl = 'http://localhost:8000';
   }
 
   /**

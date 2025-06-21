@@ -10,12 +10,10 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 class EmotionController
 {
     private $supabaseService;
-    private $databaseService;
 
-    public function __construct(SupabaseService $supabaseService, DatabaseService $databaseService)
+    public function __construct(SupabaseService $supabaseService)
     {
         $this->supabaseService = $supabaseService;
-        $this->databaseService = $databaseService;
     }
 
     /**
@@ -45,32 +43,17 @@ class EmotionController
         }
 
         try {
-            // First try Supabase
+            // Create emotion in Supabase
             $supabaseResult = $this->supabaseService->createEmotion($data);
             
             if ($supabaseResult['success']) {
-                // Also save to SQLite as backup
-                $this->databaseService->createEmotion($data);
-                
                 $response->getBody()->write(json_encode([
                     'status' => 'success',
                     'data' => $supabaseResult['data']
                 ]));
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(201);
             } else {
-                // Fallback to SQLite
-                $sqliteResult = $this->databaseService->createEmotion($data);
-                
-                if ($sqliteResult['success']) {
-                    $response->getBody()->write(json_encode([
-                        'status' => 'success',
-                        'data' => $sqliteResult['data'],
-                        'source' => 'fallback'
-                    ]));
-                    return $response->withHeader('Content-Type', 'application/json')->withStatus(201);
-                } else {
-                    throw new \Exception($sqliteResult['error']);
-                }
+                throw new \Exception($supabaseResult['error']);
             }
         } catch (\Exception $e) {
             $response->getBody()->write(json_encode([
@@ -101,7 +84,7 @@ class EmotionController
         }
 
         try {
-            // Try Supabase first
+            // Get emotions from Supabase
             $supabaseResult = $this->supabaseService->getUserEmotions($userId, $limit, $days);
             
             if ($supabaseResult['success']) {
@@ -111,19 +94,7 @@ class EmotionController
                 ]));
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
             } else {
-                // Fallback to SQLite
-                $sqliteResult = $this->databaseService->getUserEmotions($userId, $limit, $days);
-                
-                if ($sqliteResult['success']) {
-                    $response->getBody()->write(json_encode([
-                        'status' => 'success',
-                        'data' => $sqliteResult['data'],
-                        'source' => 'fallback'
-                    ]));
-                    return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
-                } else {
-                    throw new \Exception($sqliteResult['error']);
-                }
+                throw new \Exception($supabaseResult['error']);
             }
         } catch (\Exception $e) {
             $response->getBody()->write(json_encode([
@@ -153,7 +124,7 @@ class EmotionController
         }
 
         try {
-            // Try Supabase first
+            // Get insights from Supabase
             $supabaseResult = $this->supabaseService->getEmotionInsights($userId, $days);
             
             if ($supabaseResult['success']) {
@@ -163,19 +134,7 @@ class EmotionController
                 ]));
                 return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
             } else {
-                // Fallback to SQLite
-                $sqliteResult = $this->databaseService->getEmotionInsights($userId, $days);
-                
-                if ($sqliteResult['success']) {
-                    $response->getBody()->write(json_encode([
-                        'status' => 'success',
-                        'data' => $sqliteResult['data'],
-                        'source' => 'fallback'
-                    ]));
-                    return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
-                } else {
-                    throw new \Exception($sqliteResult['error']);
-                }
+                throw new \Exception($supabaseResult['error']);
             }
         } catch (\Exception $e) {
             $response->getBody()->write(json_encode([

@@ -11,19 +11,15 @@ return function ($app) {
         return $response->withHeader('Content-Type', 'application/json');
     });
     
-    $app->group('/api', function () use ($app) {
-        $app->group('/emotions', function () use ($app) {
-            // Create emotion entry
-            $app->post('', [EmotionController::class, 'create']);
-            
-            // Get user's emotions
-            $app->get('', [EmotionController::class, 'getUserEmotions']);
-            
-            // Get emotion insights
-            $app->get('/insights', [EmotionController::class, 'getInsights']);
-            
-            // Delete emotion entry
-            $app->delete('/{id}', [EmotionController::class, 'delete']);
-        });
-    });
+    // Create emotion entry
+    $app->post('/api/emotions', [EmotionController::class, 'createEmotion']);
+    
+    // Get user's emotions
+    $app->get('/api/emotions', [EmotionController::class, 'getUserEmotions']);
+    
+    // Get emotion insights
+    $app->get('/api/emotions/insights', [EmotionController::class, 'getEmotionInsights']);
+    
+    // Delete emotion entry
+    $app->delete('/api/emotions/{id}', [EmotionController::class, 'deleteEmotion']);
 };

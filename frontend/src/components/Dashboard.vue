@@ -10,6 +10,7 @@
           
           <div class="flex items-center space-x-4">
             <span class="text-white/80">Welcome, {{ user?.name }}!</span>
+            <span class="text-white/60 text-xs">ID: {{ user?.id }}</span>
             <button
               @click="logout"
               class="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-200 rounded-lg transition-colors"
@@ -195,6 +196,16 @@
             <div class="text-white font-medium">View Insights</div>
             <div class="text-white/60 text-sm">See your mood patterns</div>
           </button>
+          
+          <!-- Debug button -->
+          <button 
+            @click="testAPI"
+            class="p-4 bg-purple-500/20 hover:bg-purple-500/30 rounded-lg transition-colors text-left"
+          >
+            <div class="text-2xl mb-2">🔧</div>
+            <div class="text-white font-medium">Test API</div>
+            <div class="text-white/60 text-sm">Debug emotions API</div>
+          </button>
         </div>
       </div>
     </main>
@@ -243,6 +254,8 @@ function formatMoodSensitivity(sensitivity) {
 async function loadUserData() {
   try {
     user.value = authService.getUser()
+    console.log('Dashboard: Current user from localStorage:', user.value);
+    
     preferences.value = authService.getWeatherPreferences()
     
     // Optionally refresh from server
@@ -250,6 +263,7 @@ async function loadUserData() {
     if (result.success) {
       user.value = result.data.user
       preferences.value = result.data.weather_preferences
+      console.log('Dashboard: Updated user from server:', user.value);
     }
   } catch (error) {
     console.error('Failed to load user data:', error)
@@ -282,6 +296,29 @@ async function loadWeatherData() {
 // Refresh weather data
 async function refreshWeatherData() {
   await loadWeatherData()
+}
+
+// Test API function
+async function testAPI() {
+  console.log('Testing API...')
+  const currentUser = authService.getUser()
+  console.log('Current user:', currentUser)
+  
+  if (!currentUser) {
+    alert('No user logged in!')
+    return
+  }
+  
+  try {
+    // Test insights API
+    const result = await fetch(`http://localhost:8001/api/emotions/insights?user_id=${currentUser.id}`)
+    const data = await result.json()
+    console.log('API Result:', data)
+    alert(`API Test Result: ${JSON.stringify(data, null, 2)}`)
+  } catch (error) {
+    console.error('API Test Error:', error)
+    alert(`API Test Error: ${error.message}`)
+  }
 }
 
 // Initialize

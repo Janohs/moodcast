@@ -1,6 +1,6 @@
 class EmotionService {
   constructor() {
-    this.apiBaseUrl = 'http://localhost:8001';
+    this.apiBaseUrl = 'http://localhost:8000';
   }
 
   /**
@@ -8,6 +8,9 @@ class EmotionService {
    */
   async createEmotion(emotionData) {
     try {
+      console.log('EmotionService: Creating emotion with data:', emotionData);
+      console.log('EmotionService: API URL:', `${this.apiBaseUrl}/api/emotions`);
+      
       const response = await fetch(`${this.apiBaseUrl}/api/emotions`, {
         method: 'POST',
         headers: {
@@ -16,14 +19,22 @@ class EmotionService {
         body: JSON.stringify(emotionData)
       });
 
+      console.log('EmotionService: Response status:', response.status);
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
+      // Normalize backend response
+      if (result.status === 'success') {
+        return { success: true, ...result };
+      } else if (result.status === 'error') {
+        return { success: false, error: result.message || 'Unknown error', ...result };
+      }
       return result;
     } catch (error) {
-      console.error('Error creating emotion:', error);
+      console.error('EmotionService: Error creating emotion:', error);
       return {
         success: false,
         error: error.message
@@ -34,20 +45,21 @@ class EmotionService {
   /**
    * Get user's emotion entries
    */
-  async getUserEmotions(limit = 30, days = 30) {
+  async getUserEmotions(userId, limit = 30, days = 30) {
     try {
-      const response = await fetch(`${this.apiBaseUrl}/api/emotions?limit=${limit}&days=${days}`, {
+      const response = await fetch(`${this.apiBaseUrl}/api/emotions?user_id=${userId}&limit=${limit}&days=${days}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         }
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
       const result = await response.json();
+      if (result.status === 'success') {
+        return { success: true, ...result };
+      } else if (result.status === 'error') {
+        return { success: false, error: result.message || 'Unknown error', ...result };
+      }
       return result;
     } catch (error) {
       console.error('Error fetching emotions:', error);
@@ -61,23 +73,34 @@ class EmotionService {
   /**
    * Get emotion insights and analytics
    */
-  async getEmotionInsights(days = 30) {
+  async getEmotionInsights(userId, days = 30) {
     try {
-      const response = await fetch(`${this.apiBaseUrl}/api/emotions/insights?days=${days}`, {
+      console.log('EmotionService: Getting insights for user:', userId, 'days:', days);
+      const url = `${this.apiBaseUrl}/api/emotions/insights?user_id=${userId}&days=${days}`;
+      console.log('EmotionService: API URL:', url);
+      
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         }
       });
 
+      console.log('EmotionService: Response status:', response.status);
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
+      if (result.status === 'success') {
+        return { success: true, ...result };
+      } else if (result.status === 'error') {
+        return { success: false, error: result.message || 'Unknown error', ...result };
+      }
       return result;
     } catch (error) {
-      console.error('Error fetching insights:', error);
+      console.error('EmotionService: Error fetching insights:', error);
       return {
         success: false,
         error: error.message

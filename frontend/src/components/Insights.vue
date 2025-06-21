@@ -257,11 +257,23 @@ async function loadInsights() {
   error.value = ''
 
   try {
+    // Get current user
+    const user = authService.getUser()
+    console.log('Insights: Current user:', user);
+    
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+
+    console.log('Insights: Loading insights for user ID:', user.id, 'period:', selectedPeriod.value);
+
     // Load insights and recent entries in parallel
     const [insightsResult, entriesResult] = await Promise.all([
-      emotionService.getEmotionInsights(selectedPeriod.value),
-      emotionService.getUserEmotions(10, selectedPeriod.value)
+      emotionService.getEmotionInsights(user.id, selectedPeriod.value),
+      emotionService.getUserEmotions(user.id, 10, selectedPeriod.value)
     ])
+
+    console.log('Insights: Results received:', { insightsResult, entriesResult });
 
     if (insightsResult.success) {
       insights.value = insightsResult.data
@@ -274,6 +286,7 @@ async function loadInsights() {
     }
 
   } catch (err) {
+    console.error('Insights: Error loading insights:', err);
     error.value = err.message
   } finally {
     loading.value = false

@@ -50,6 +50,10 @@ $container->set(AuthController::class, function ($container) {
     );
 });
 
+$container->set(DatabaseService::class, function () {
+    return DatabaseService::getInstance();
+});
+
 $container->set(EmotionController::class, function ($container) {
     return new EmotionController(
         $container->get(SupabaseService::class)
