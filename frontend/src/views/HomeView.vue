@@ -25,10 +25,3 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped>
-.home {
-  min-height: 100vh;
-  color: white;
-  width: 100%;
-}
-</style>

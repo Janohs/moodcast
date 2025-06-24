@@ -3,6 +3,7 @@ import { RouterView } from 'vue-router'
 </script>
 
 <template>
+
   <div class="app-container">
     <!-- Background wallpaper -->
     <div class="wallpaper-bg"></div>

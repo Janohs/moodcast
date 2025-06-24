@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-700">
+  <div class="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-700">
     <div class="absolute inset-0 bg-black opacity-20"></div>
     
     <!-- Floating particles background -->
@@ -9,21 +9,21 @@
       </div>
     </div>
 
-    <div class="relative max-w-md w-full space-y-8">
+    <div class="relative max-w-md w-full space-y-6">
       <!-- Header -->
       <div class="text-center">
-        <div class="mb-4">
-          <h1 class="text-5xl font-bold text-white mb-2 tracking-tight">
+        <div class="mb-6">
+          <h1 class="text-5xl font-bold text-white mb-3 tracking-tight">
             <span class="inline-block animate-pulse">🌦️</span> MoodCast
           </h1>
-          <div class="h-1 w-20 bg-gradient-to-r from-blue-400 to-purple-400 mx-auto rounded-full"></div>
+          <div class="h-1 w-24 bg-gradient-to-r from-blue-400 to-purple-400 mx-auto rounded-full"></div>
         </div>
         <p class="text-white/90 text-lg font-medium">Track your mood with the weather</p>
         <p class="text-white/70 text-sm mt-2">Discover how weather affects your emotions</p>
       </div>
 
       <!-- Auth Form -->
-      <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 shadow-2xl border border-white/20 transition-all duration-300 hover:bg-white/15">
+      <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 sm:p-8 shadow-2xl border border-white/20 transition-all duration-300 hover:bg-white/15">
         <!-- Tab Toggle -->
         <div class="flex bg-white/20 rounded-xl p-1 mb-6 relative overflow-hidden">
           <div 
@@ -31,7 +31,7 @@
             :style="{ 
               left: isLogin ? '4px' : '50%', 
               width: 'calc(50% - 4px)',
-              transform: isLogin ? 'translateX(0)' : 'translateX(-50%)'
+              transform: isLogin ? 'translateX(0)' : 'translateX(4px)'
             }"
           ></div>
           <button
@@ -69,10 +69,10 @@
           name="slide-fade" 
           mode="out-in"
         >
-          <form v-if="isLogin" @submit.prevent="handleLogin" class="space-y-6" key="login">
+          <form v-if="isLogin" @submit.prevent="handleLogin" class="space-y-5" key="login">
             <div class="space-y-4">
               <div class="form-group">
-                <label class="block text-white text-sm font-medium mb-2 flex items-center gap-2">
+                <label class="flex text-white text-sm font-medium mb-1.5 items-center gap-2">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                   </svg>
@@ -83,7 +83,7 @@
                   type="email"
                   required
                   :class="[
-                    'w-full px-4 py-3 rounded-lg bg-white/15 border border-white/30 text-white placeholder-white/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 focus:bg-white/20',
+                    'w-full px-4 py-2.5 rounded-lg bg-white/15 border border-white/30 text-white placeholder-white/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 focus:bg-white/20',
                     errors.email ? 'border-red-400/70 bg-red-500/10' : 'border-white/30 hover:border-white/40'
                   ]"
                   placeholder="Enter your email address"
@@ -99,7 +99,7 @@
               </div>
               
               <div class="form-group">
-                <label class="block text-white text-sm font-medium mb-2 flex items-center gap-2">
+                <label class="flex text-white text-sm font-medium mb-1.5 items-center gap-2">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                   </svg>
@@ -110,7 +110,7 @@
                   type="password"
                   required
                   :class="[
-                    'w-full px-4 py-3 rounded-lg bg-white/15 border border-white/30 text-white placeholder-white/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 focus:bg-white/20',
+                    'w-full px-4 py-2.5 rounded-lg bg-white/15 border border-white/30 text-white placeholder-white/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 focus:bg-white/20',
                     errors.password ? 'border-red-400/70 bg-red-500/10' : 'border-white/30 hover:border-white/40'
                   ]"
                   placeholder="Enter your password"
@@ -129,7 +129,7 @@
             <button
               type="submit"
               :disabled="loading"
-              class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-[1.01] hover:shadow-lg flex items-center justify-center gap-2"
+              class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2.5 px-6 rounded-lg transition-all duration-200 transform hover:scale-[1.01] hover:shadow-lg flex items-center justify-center gap-2"
             >
               <svg v-if="loading" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -146,7 +146,7 @@
           <form v-else @submit.prevent="handleRegister" class="space-y-5" key="register">
             <div class="space-y-4">
               <div class="form-group">
-                <label class="block text-white text-sm font-medium mb-2 flex items-center gap-2">
+                <label class="flex text-white text-sm font-medium mb-1.5 items-center gap-2">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                   </svg>
@@ -157,7 +157,7 @@
                   type="text"
                   required
                   :class="[
-                    'w-full px-4 py-3 rounded-lg bg-white/15 border border-white/30 text-white placeholder-white/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-400/50 focus:border-green-400/50 focus:bg-white/20',
+                    'w-full px-4 py-2.5 rounded-lg bg-white/15 border border-white/30 text-white placeholder-white/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-400/50 focus:border-green-400/50 focus:bg-white/20',
                     errors.name ? 'border-red-400/70 bg-red-500/10' : 'border-white/30 hover:border-white/40'
                   ]"
                   placeholder="Enter your full name"
@@ -173,7 +173,7 @@
               </div>
 
               <div class="form-group">
-                <label class="block text-white text-sm font-medium mb-2 flex items-center gap-2">
+                <label class="flex text-white text-sm font-medium mb-1.5 items-center gap-2">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                   </svg>
@@ -184,7 +184,7 @@
                   type="email"
                   required
                   :class="[
-                    'w-full px-4 py-3 rounded-lg bg-white/15 border border-white/30 text-white placeholder-white/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-400/50 focus:border-green-400/50 focus:bg-white/20',
+                    'w-full px-4 py-2.5 rounded-lg bg-white/15 border border-white/30 text-white placeholder-white/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-400/50 focus:border-green-400/50 focus:bg-white/20',
                     errors.email ? 'border-red-400/70 bg-red-500/10' : 'border-white/30 hover:border-white/40'
                   ]"
                   placeholder="Enter your email address"
@@ -200,7 +200,7 @@
               </div>
               
               <div class="form-group">
-                <label class="block text-white text-sm font-medium mb-2 flex items-center gap-2">
+                <label class="flex text-white text-sm font-medium mb-1.5 items-center gap-2">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                   </svg>
@@ -211,7 +211,7 @@
                   type="password"
                   required
                   :class="[
-                    'w-full px-4 py-3 rounded-lg bg-white/15 border border-white/30 text-white placeholder-white/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-400/50 focus:border-green-400/50 focus:bg-white/20',
+                    'w-full px-4 py-2.5 rounded-lg bg-white/15 border border-white/30 text-white placeholder-white/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-400/50 focus:border-green-400/50 focus:bg-white/20',
                     errors.password ? 'border-red-400/70 bg-red-500/10' : 'border-white/30 hover:border-white/40'
                   ]"
                   placeholder="Create a secure password (min 6 characters)"
@@ -227,7 +227,7 @@
               </div>
 
               <div class="form-group">
-                <label class="block text-white text-sm font-medium mb-2 flex items-center gap-2">
+                <label class="flex text-white text-sm font-medium mb-1.5 items-center gap-2">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
@@ -238,7 +238,7 @@
                   type="password"
                   required
                   :class="[
-                    'w-full px-4 py-3 rounded-lg bg-white/15 border border-white/30 text-white placeholder-white/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-400/50 focus:border-green-400/50 focus:bg-white/20',
+                    'w-full px-4 py-2.5 rounded-lg bg-white/15 border border-white/30 text-white placeholder-white/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-400/50 focus:border-green-400/50 focus:bg-white/20',
                     errors.confirmPassword ? 'border-red-400/70 bg-red-500/10' : 'border-white/30 hover:border-white/40'
                   ]"
                   placeholder="Confirm your password"
@@ -257,7 +257,7 @@
             <button
               type="submit"
               :disabled="loading"
-              class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-[1.01] hover:shadow-lg flex items-center justify-center gap-2"
+              class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2.5 px-6 rounded-lg transition-all duration-200 transform hover:scale-[1.01] hover:shadow-lg flex items-center justify-center gap-2"
             >
               <svg v-if="loading" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -296,8 +296,8 @@
       </div>
 
       <!-- Test Links (only in development) -->
-      <div v-if="isDevelopment" class="text-center space-y-3 mt-8">
-        <p class="text-white/60 text-sm font-medium">Development Tools</p>
+      <div v-if="isDevelopment" class="text-center space-y-2 mt-6">
+        <p class="text-white/70 text-sm font-medium">Development Tools</p>
         <div class="flex justify-center space-x-6">
           <router-link 
             to="/database-test" 
@@ -551,141 +551,3 @@ watch([error, successMessage], () => {
 })
 </script>
 
-<style scoped>
-/* Transitions */
-.slide-fade-enter-active, .slide-fade-leave-active {
-  transition: all 0.3s ease-out;
-}
-.slide-fade-enter-from {
-  transform: translateX(20px);
-  opacity: 0;
-}
-.slide-fade-leave-to {
-  transform: translateX(-20px);
-  opacity: 0;
-}
-
-.error-fade-enter-active, .error-fade-leave-active {
-  transition: all 0.2s ease-out;
-}
-.error-fade-enter-from, .error-fade-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
-.alert-fade-enter-active, .alert-fade-leave-active {
-  transition: all 0.3s ease-out;
-}
-.alert-fade-enter-from, .alert-fade-leave-to {
-  opacity: 0;
-  transform: translateY(-20px) scale(0.95);
-}
-
-/* Floating particles */
-.floating-particles {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
-.particle {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 50%;
-  animation: float 6s ease-in-out infinite;
-}
-
-.particle:nth-child(1) {
-  left: 10%;
-  animation-duration: 6s;
-}
-
-.particle:nth-child(2) {
-  left: 20%;
-  animation-duration: 8s;
-}
-
-.particle:nth-child(3) {
-  left: 30%;
-  animation-duration: 5s;
-}
-
-.particle:nth-child(4) {
-  left: 60%;
-  animation-duration: 7s;
-}
-
-.particle:nth-child(5) {
-  left: 80%;
-  animation-duration: 9s;
-}
-
-.particle:nth-child(6) {
-  left: 90%;
-  animation-duration: 4s;
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(100vh) scale(0);
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  90% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* Form enhancements */
-.form-group input:focus {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-}
-
-/* Button hover effects */
-button {
-  position: relative;
-  overflow: hidden;
-}
-
-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-  transition: left 0.5s;
-}
-
-button:hover::before {
-  left: 100%;
-}
-
-/* Custom scrollbar for webkit browsers */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
-}
-</style>
